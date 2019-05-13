@@ -1,0 +1,2 @@
+Add handling for arrays
+Add ability to read a file of paths, and only write mandatory fields in sample JSON
