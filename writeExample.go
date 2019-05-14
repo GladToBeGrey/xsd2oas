@@ -34,7 +34,7 @@ func writeExample(f io.Writer, ctxt *context) {
 	indent := ""
 	path := ""
 	doc := ctxt.complexTypes["Document"]
-	fmt.Printf("Got Document%v\n", doc)
+	// fmt.Printf("Got Document%v\n", doc)
 	fmt.Fprintf(f, "%v{\n", indent)
 	writeOne(f, ctxt, doc, path, indent)
 	fmt.Fprintf(f, "%v}\n", indent)
@@ -52,7 +52,7 @@ func writeOne(f io.Writer, ctxt *context, cplx complexType, path string, indent 
 		if t, ok := ctxt.complexTypes[el.etype]; ok {
 			//process complex type
 			// fmt.Printf("Path:%v(%v)\n", path+"/"+el.name, el.etype)
-			fmt.Printf("Path:%v\n", path+"/"+el.name)
+			// fmt.Printf("Path:%v\n", path+"/"+el.name)
 			fmt.Fprintf(f, "%v\"%v\": %v{\n", indent+tab, el.name, arOpen)
 			writeOne(f, ctxt, t, path+"/"+el.name, indent+tab)
 			fmt.Fprintf(f, "%v", arClose)
@@ -60,18 +60,18 @@ func writeOne(f io.Writer, ctxt *context, cplx complexType, path string, indent 
 			//process simple type
 			s := ctxt.simpleTypes[el.etype]
 			if len(s.attrs) == 0 {
-				fmt.Printf("Path:%v(%v)\n", path+"/"+el.name, s.base)
+				// fmt.Printf("Path:%v(%v)\n", path+"/"+el.name, s.base)
 				fmt.Fprintf(f, "%v\"%v\": %v %v %v", indent+tab, el.name, arOpen, sampleData(s), arClose)
 			} else {
-				fmt.Printf("Path:%v\n", path+"/"+el.name)
+				// fmt.Printf("Path:%v\n", path+"/"+el.name)
 				fmt.Fprintf(f, "%v\"%v\": %v{\n", indent+tab, el.name, arOpen)
-				fmt.Printf("Path:%v(%v)\n", path+"/"+el.name+"/value", s.base)
+				// fmt.Printf("Path:%v(%v)\n", path+"/"+el.name+"/value", s.base)
 				fmt.Fprintf(f, "%v\"%v\": %v,\n", indent+tab+tab, "value", sampleData(s))
 				for idx, attr := range s.attrs {
 					if idx > 0 {
 						fmt.Fprintf(f, ",\n")
 					}
-					fmt.Printf("Path:%v(%v)\n", path+"/"+el.name+"/@"+attr.name, "string")
+					// fmt.Printf("Path:%v(%v)\n", path+"/"+el.name+"/@"+attr.name, "string")
 					atype := ctxt.simpleTypes[attr.atype]
 					fmt.Fprintf(f, "%v\"%v\": %v", indent+tab+tab, "@"+attr.name, sampleData(atype))
 				}

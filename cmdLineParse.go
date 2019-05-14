@@ -31,11 +31,17 @@ func cmdLineParse(ctxt *context) {
 	outFilePtr := flag.String("out", "", "output file name")
 	exFilePtr := flag.String("ex", "", "example file name")
 	maskFilePtr := flag.String("mask", "", "mask file name")
+	licPtr := flag.Bool("lic", false, "print license info")
+	verbPtr := flag.Bool("v", false, "verbose")
 
 	flag.Parse()
 
 	if *inFilePtr == "" || *outFilePtr == "" {
-		fmt.Printf("Usage: %s -in xsdfile -out yamlfile [-mask maskfile -ex examplefile]", filepath.Base(os.Args[0]))
+		fmt.Printf(
+			`Usage: %s -in xsdfile -out yamlfile
+Optional parameters:
+-mask maskfile
+-ex examplefile`, filepath.Base(os.Args[0]))
 		os.Exit(1)
 	}
 
@@ -43,6 +49,9 @@ func cmdLineParse(ctxt *context) {
 	ctxt.inFileBase = filepath.Base(ctxt.inFile)
 	ctxt.outFile = *outFilePtr
 	ctxt.outFileBase = filepath.Base(ctxt.outFile)
+	ctxt.printLicense = *licPtr
+	ctxt.verbose = *verbPtr
+
 	if *exFilePtr != "" {
 		ctxt.exFile = *exFilePtr
 		ctxt.exFileBase = filepath.Base(ctxt.exFile)

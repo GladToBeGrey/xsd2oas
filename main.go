@@ -28,15 +28,18 @@ import (
 func main() {
 
 	var exf, maskf *os.File
-	// license notice
-	fmt.Println("xsd2oas Copyright (C) 2019  Tom Hay")
-	fmt.Println("This program comes with ABSOLUTELY NO WARRANTY")
-	fmt.Println("This is free software, and you are welcome to redistribute it")
-	fmt.Println("under certain conditions; see COPYING.txt for details.")
 
+	// license notice
 	// initialise
 	ctxt := newContext()
 	cmdLineParse(&ctxt)
+
+	if ctxt.printLicense {
+		fmt.Println("xsd2oas Copyright (C) 2019  Tom Hay")
+		fmt.Println("This program comes with ABSOLUTELY NO WARRANTY")
+		fmt.Println("This is free software, and you are welcome to redistribute it")
+		fmt.Println("under certain conditions; see COPYING.txt for details.")
+	}
 
 	// open the input file
 	fname := ctxt.inFile
@@ -73,7 +76,7 @@ func main() {
 			fmt.Printf("File %v scan err %v", fname, scanner.Err())
 			os.Exit(2)
 		}
-		fmt.Printf("File %v scanned OK - %v lines\n", fname, len(ctxt.maskLines))
+		// fmt.Printf("File %v scanned OK - %v lines\n", fname, len(ctxt.maskLines))
 	}
 	defer maskf.Close()
 
@@ -86,7 +89,7 @@ func main() {
 			os.Exit(2)
 		}
 		exf = f
-		fmt.Printf("File %v open OK\n", fname)
+		// fmt.Printf("File %v open OK\n", fname)
 	}
 	defer exf.Close()
 

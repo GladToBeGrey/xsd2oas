@@ -29,7 +29,7 @@ func tagInclude(ctxt *context) {
 
 	path := ""
 	doc := ctxt.complexTypes["Document"]
-	fmt.Printf("Got Document%v\n", doc)
+	// fmt.Printf("Got Document%v\n", doc)
 	tagOne(ctxt, &doc, path)
 }
 
@@ -39,8 +39,9 @@ func tagOne(ctxt *context, cplx *complexType, path string) {
 		if rqd {
 			el.include = true
 			cplx.elems[idx] = el
-			// fmt.Printf("Include: %v\n", path+"/"+el.name)
-			fmt.Printf("%v\n", path+"/"+el.name)
+			if ctxt.verbose {
+				fmt.Printf("%v\n", path+"/"+el.name)
+			}
 			if t, ok := ctxt.complexTypes[el.etype]; ok {
 				//process complex type
 				t.include = true

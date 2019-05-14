@@ -89,6 +89,8 @@ type context struct {
 	outFileBase  string
 	exFileBase   string
 	maskFileBase string
+	printLicense bool
+	verbose      bool
 	mask         bool
 	maskLines    []string
 	domain       string
