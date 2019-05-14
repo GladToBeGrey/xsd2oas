@@ -35,6 +35,7 @@ type element struct {
 	etype     string
 	minOccurs int
 	maxOccurs int
+	include   bool // if using mask
 }
 
 // any attribute
@@ -64,6 +65,7 @@ type simpleType struct {
 	maxLength      int
 	whiteSpace     string // preserve | replace | collapse
 	pattern        string
+	include        bool // if using mask
 }
 
 // definition of a complex type
@@ -74,20 +76,25 @@ type complexType struct {
 	elems      []element
 	simpleBase *simpleType
 	anyFlag    bool //does the type allow "any" extension?
+	include    bool // if using mask
 }
 
 // data being worked on
 type context struct {
-	inFile      string
-	outFile     string
-	exFile      string
-	inFileBase  string // base part of path
-	outFileBase string
-	exFileBase  string
-	domain      string
-	smplType    *simpleType
-	cplxType    *complexType
-	elem        *element
+	inFile       string
+	outFile      string
+	exFile       string
+	maskFile     string
+	inFileBase   string // base part of path
+	outFileBase  string
+	exFileBase   string
+	maskFileBase string
+	mask         bool
+	maskLines    []string
+	domain       string
+	smplType     *simpleType
+	cplxType     *complexType
+	elem         *element
 	// the dictionary
 	root         *element
 	simpleTypes  map[string]simpleType

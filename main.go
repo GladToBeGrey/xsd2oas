@@ -20,13 +20,14 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 )
 
 func main() {
 
-	var exf *os.File
+	var exf, maskf *os.File
 	// license notice
 	fmt.Println("xsd2oas Copyright (C) 2019  Tom Hay")
 	fmt.Println("This program comes with ABSOLUTELY NO WARRANTY")
@@ -55,6 +56,27 @@ func main() {
 	}
 	defer outf.Close()
 
+	// open the mask file
+	if ctxt.maskFile != "" {
+		ctxt.mask = true
+		fname := ctxt.maskFile
+		maskf, err := os.Open(fname)
+		if err != nil {
+			fmt.Printf("File %v open err %v", fname, err)
+			os.Exit(2)
+		}
+		scanner := bufio.NewScanner(maskf)
+		for scanner.Scan() {
+			ctxt.maskLines = append(ctxt.maskLines, scanner.Text())
+		}
+		if scanner.Err() != nil {
+			fmt.Printf("File %v scan err %v", fname, scanner.Err())
+			os.Exit(2)
+		}
+		fmt.Printf("File %v scanned OK - %v lines\n", fname, len(ctxt.maskLines))
+	}
+	defer maskf.Close()
+
 	// open the example file
 	if ctxt.exFile != "" {
 		fname := ctxt.exFile
@@ -69,6 +91,7 @@ func main() {
 	defer exf.Close()
 
 	parseXml(inf, &ctxt)
+	tagInclude(&ctxt)
 	writeYaml(outf, &ctxt)
 	if ctxt.exFile != "" {
 		writeExample(exf, &ctxt)

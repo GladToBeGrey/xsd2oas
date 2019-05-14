@@ -30,11 +30,12 @@ func cmdLineParse(ctxt *context) {
 	inFilePtr := flag.String("in", "", "input file name")
 	outFilePtr := flag.String("out", "", "output file name")
 	exFilePtr := flag.String("ex", "", "example file name")
+	maskFilePtr := flag.String("mask", "", "mask file name")
 
 	flag.Parse()
 
 	if *inFilePtr == "" || *outFilePtr == "" {
-		fmt.Printf("Usage: %s -in xsdfile -out yamlfile [-ex examplefile]", filepath.Base(os.Args[0]))
+		fmt.Printf("Usage: %s -in xsdfile -out yamlfile [-mask maskfile -ex examplefile]", filepath.Base(os.Args[0]))
 		os.Exit(1)
 	}
 
@@ -45,5 +46,9 @@ func cmdLineParse(ctxt *context) {
 	if *exFilePtr != "" {
 		ctxt.exFile = *exFilePtr
 		ctxt.exFileBase = filepath.Base(ctxt.exFile)
+	}
+	if *maskFilePtr != "" {
+		ctxt.maskFile = *maskFilePtr
+		ctxt.maskFileBase = filepath.Base(ctxt.maskFile)
 	}
 }

@@ -180,13 +180,20 @@ func writeSchemas(f io.Writer, ctxt *context, indent int) {
 	inPrintf(f, indent, "schemas:\n\n")
 	inPrintf(f, indent+tsz, "# ---Simple type definitions---\n\n")
 	for _, simple := range ctxt.simpleTypes {
-		writeSimple(simple, f, ctxt, indent+tsz)
+		if simple.include {
+			// fmt.Printf("Writing simple %v\n", simple.name)
+			writeSimple(simple, f, ctxt, indent+tsz)
+		} else {
+			// fmt.Printf("Ignoring simple %v\n", simple.name)
+		}
 	}
 	// now print all the complex type definitions
 	inPrintf(f, 0, "\n")
 	inPrintf(f, indent+tsz, "# ---Complex type definitions---\n\n")
 	for _, cmplx := range ctxt.complexTypes {
-		writeComplex(cmplx, f, ctxt, indent+tsz)
+		if cmplx.include {
+			writeComplex(cmplx, f, ctxt, indent+tsz)
+		}
 	}
 }
 
@@ -225,10 +232,12 @@ func writeComplexBody(cmplx complexType, f io.Writer, ctxt *context, indent int)
 		//         "$ref": "#/components/schemas/AgentTypeDef",
 		inPrintf(f, indent, "\"oneOf\":\n")
 		for _, el := range cmplx.elems {
-			inPrintf(f, indent+tsz, "- type: \"object\"\n")
-			inPrintf(f, indent+tsz+2, "properties:\n")
-			inPrintf(f, indent+tsz+tsz+2, "%s:\n", el.getName())
-			inPrintf(f, indent+tsz+tsz+tsz+2, "$ref: '#/components/schemas/%s'\n", el.etype)
+			if el.include {
+				inPrintf(f, indent+tsz, "- type: \"object\"\n")
+				inPrintf(f, indent+tsz+2, "properties:\n")
+				inPrintf(f, indent+tsz+tsz+2, "%s:\n", el.getName())
+				inPrintf(f, indent+tsz+tsz+tsz+2, "$ref: '#/components/schemas/%s'\n", el.etype)
+			}
 		}
 
 	default:
@@ -241,9 +250,11 @@ func writeComplexBody(cmplx complexType, f io.Writer, ctxt *context, indent int)
 			}
 			required := make([]string, 0)
 			for _, el := range cmplx.elems {
-				writeElement(el, f, ctxt, indent+tsz)
-				if el.minOccurs != 0 {
-					required = append(required, el.getName())
+				if el.include {
+					writeElement(el, f, ctxt, indent+tsz)
+					if el.minOccurs != 0 {
+						required = append(required, el.getName())
+					}
 				}
 			}
 			if len(required) > 0 {
