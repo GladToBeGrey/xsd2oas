@@ -34,31 +34,48 @@ func tagInclude(f io.Writer, ctxt *context) {
 	tagOne(ctxt, &doc, path, f)
 }
 
-func tagOne(ctxt *context, cplx *complexType, path string, f io.Writer) {
-	// fmt.Printf("Tagging: %v\n", path)
+func tagOne(ctxt *context, cplx *complexType, path string, f io.Writer) bool {
+	printed := false
+	fmt.Printf("Tagging: %v\n", path)
 	for idx, el := range cplx.elems {
 		// fmt.Printf("Checking: %v (%v)\n", path+"/"+el.name, el.minOccurs)
 		choice := cplx.etype == "choice"
-		rqd := ctxt.all || // user specified all on command line
-			!(choice || el.minOccurs == 0) || // XSD specifies mandatory: minOccurs -1 means unspecified, default 1
-			isRequired(ctxt, path+"/"+el.name) // mask file requires inclusion
-		if rqd {
-			el.include = true
-			cplx.elems[idx] = el
+		rqdXsd := ctxt.all || el.minOccurs != 0                   // XSD specifies mandatory: minOccurs -1 means unspecified, default 1
+		rqdMask := ctxt.all || isRequired(ctxt, path+"/"+el.name) // mask file requires inclusion
+		if rqdXsd || rqdMask {
 			if t, ok := ctxt.complexTypes[el.etype]; ok {
 				//process complex type
-				t.include = true
-				tagOne(ctxt, &t, path+"/"+el.name, f)
-				ctxt.complexTypes[el.etype] = t
-				// fmt.Printf("Complex: %v\n", path+"/"+el.name)
-			} else {
-				if f != nil {
-					fmt.Fprintf(f, "%v\n", path+"/"+el.name)
+				if tagOne(ctxt, &t, path+"/"+el.name, f) {
+					printed = true
+					t.include = true
+					el.include = true
+				} else if !choice || rqdMask {
+					t.include = true
+					el.include = true
+					// this element is required, and it's not been printed as part of the path to a child
+					// but don't print 'mandatory' elements of choices because only one can be used (the one specified in mask)
+					if f != nil {
+						fmt.Fprintf(f, "%v\n", path+"/"+el.name)
+						printed = true
+					}
 				}
+				if true /*t.include*/ {
+					ctxt.complexTypes[el.etype] = t
+				}
+				fmt.Printf("Complex: %v\n", path+"/"+el.name)
+			} else {
+				// this element is required, but don't print 'mandatory' elements of choices unless specified in mask
+				if !choice || rqdMask {
+					if f != nil {
+						fmt.Fprintf(f, "%v\n", path+"/"+el.name)
+						printed = true
+					}
+				}
+				el.include = true
 				t := ctxt.simpleTypes[el.etype]
 				t.include = true
 				ctxt.simpleTypes[el.etype] = t
-				// fmt.Printf("Simple: %v\n", path+"/"+el.name)
+				fmt.Printf("Simple: %v\n", path+"/"+el.name)
 				for _, attr := range t.attrs {
 					t := ctxt.simpleTypes[attr.atype]
 					t.include = true
@@ -66,7 +83,12 @@ func tagOne(ctxt *context, cplx *complexType, path string, f io.Writer) {
 				}
 			}
 		}
+		if el.include {
+			cplx.elems[idx] = el
+		}
+
 	}
+	return printed
 }
 
 func isRequired(ctxt *context, path string) bool {
