@@ -27,12 +27,13 @@ import (
 )
 
 func cmdLineParse(ctxt *context) {
-	inFilePtr := flag.String("in", "", "input file name")
-	outFilePtr := flag.String("out", "", "output file name")
-	exFilePtr := flag.String("ex", "", "example file name")
-	maskFilePtr := flag.String("mask", "", "mask file name")
+	inFilePtr := flag.String("in", "", "input xsd file name")
+	outFilePtr := flag.String("out", "", "output yaml file name")
+	maskFilePtr := flag.String("mask", "", "mask file name (input)")
+	pathFilePtr := flag.String("path", "", "path file name (output)")
+	exFilePtr := flag.String("ex", "", "example file name (output)")
 	licPtr := flag.Bool("lic", false, "print license info")
-	verbPtr := flag.Bool("v", false, "verbose")
+	allPtr := flag.Bool("all", false, "all elements")
 
 	flag.Parse()
 
@@ -41,7 +42,10 @@ func cmdLineParse(ctxt *context) {
 			`Usage: %s -in xsdfile -out yamlfile
 Optional parameters:
 -mask maskfile
--ex examplefile`, filepath.Base(os.Args[0]))
+-path pathfile
+-ex examplefile
+-lic (print license)
+-all (include optional elements in path file)`, filepath.Base(os.Args[0]))
 		os.Exit(1)
 	}
 
@@ -50,14 +54,18 @@ Optional parameters:
 	ctxt.outFile = *outFilePtr
 	ctxt.outFileBase = filepath.Base(ctxt.outFile)
 	ctxt.printLicense = *licPtr
-	ctxt.verbose = *verbPtr
+	ctxt.all = *allPtr
 
-	if *exFilePtr != "" {
-		ctxt.exFile = *exFilePtr
-		ctxt.exFileBase = filepath.Base(ctxt.exFile)
-	}
 	if *maskFilePtr != "" {
 		ctxt.maskFile = *maskFilePtr
 		ctxt.maskFileBase = filepath.Base(ctxt.maskFile)
+	}
+	if *pathFilePtr != "" {
+		ctxt.pathFile = *pathFilePtr
+		ctxt.pathFileBase = filepath.Base(ctxt.pathFile)
+	}
+	if *exFilePtr != "" {
+		ctxt.exFile = *exFilePtr
+		ctxt.exFileBase = filepath.Base(ctxt.exFile)
 	}
 }

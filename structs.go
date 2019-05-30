@@ -85,12 +85,14 @@ type context struct {
 	outFile      string
 	exFile       string
 	maskFile     string
+	pathFile     string
 	inFileBase   string // base part of path
 	outFileBase  string
 	exFileBase   string
 	maskFileBase string
+	pathFileBase string
 	printLicense bool
-	verbose      bool
+	all          bool
 	mask         bool
 	maskLines    []string
 	domain       string

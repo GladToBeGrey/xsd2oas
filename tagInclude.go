@@ -21,38 +21,44 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"strings"
 )
 
 // entry point for tagging
-func tagInclude(ctxt *context) {
+func tagInclude(f io.Writer, ctxt *context) {
 
 	path := ""
 	doc := ctxt.complexTypes["Document"]
 	// fmt.Printf("Got Document%v\n", doc)
-	tagOne(ctxt, &doc, path)
+	tagOne(ctxt, &doc, path, f)
 }
 
-func tagOne(ctxt *context, cplx *complexType, path string) {
+func tagOne(ctxt *context, cplx *complexType, path string, f io.Writer) {
+	// fmt.Printf("Tagging: %v\n", path)
 	for idx, el := range cplx.elems {
-		rqd := el.minOccurs > 0 || isRequired(ctxt, path+"/"+el.name)
+		// fmt.Printf("Checking: %v (%v)\n", path+"/"+el.name, el.minOccurs)
+		choice := cplx.etype == "choice"
+		rqd := ctxt.all || // user specified all on command line
+			!(choice || el.minOccurs == 0) || // XSD specifies mandatory: minOccurs -1 means unspecified, default 1
+			isRequired(ctxt, path+"/"+el.name) // mask file requires inclusion
 		if rqd {
 			el.include = true
 			cplx.elems[idx] = el
-			if ctxt.verbose {
-				fmt.Printf("%v\n", path+"/"+el.name)
-			}
 			if t, ok := ctxt.complexTypes[el.etype]; ok {
 				//process complex type
 				t.include = true
-				tagOne(ctxt, &t, path+"/"+el.name)
+				tagOne(ctxt, &t, path+"/"+el.name, f)
 				ctxt.complexTypes[el.etype] = t
 				// fmt.Printf("Complex: %v\n", path+"/"+el.name)
 			} else {
+				if f != nil {
+					fmt.Fprintf(f, "%v\n", path+"/"+el.name)
+				}
 				t := ctxt.simpleTypes[el.etype]
 				t.include = true
 				ctxt.simpleTypes[el.etype] = t
-				// fmt.Printf("Simple: %v\n", path+"/"+t.name)
+				// fmt.Printf("Simple: %v\n", path+"/"+el.name)
 				for _, attr := range t.attrs {
 					t := ctxt.simpleTypes[attr.atype]
 					t.include = true

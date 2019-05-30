@@ -23,11 +23,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
 
-	var exf, maskf *os.File
+	var exf, maskf, pathf *os.File
 
 	// license notice
 	// initialise
@@ -59,6 +60,18 @@ func main() {
 	}
 	defer outf.Close()
 
+	// open the path file
+	if ctxt.pathFile != "" {
+		fname = ctxt.pathFile
+		f, err := os.Create(fname)
+		if err != nil {
+			fmt.Printf("File %v open err %v", fname, err)
+			os.Exit(2)
+		}
+		pathf = f
+	}
+	defer pathf.Close()
+
 	// open the mask file
 	if ctxt.maskFile != "" {
 		ctxt.mask = true
@@ -70,7 +83,8 @@ func main() {
 		}
 		scanner := bufio.NewScanner(maskf)
 		for scanner.Scan() {
-			ctxt.maskLines = append(ctxt.maskLines, scanner.Text())
+			s := scanner.Text()
+			ctxt.maskLines = append(ctxt.maskLines, strings.TrimSpace(strings.Split(s, "#")[0]))
 		}
 		if scanner.Err() != nil {
 			fmt.Printf("File %v scan err %v", fname, scanner.Err())
@@ -94,7 +108,7 @@ func main() {
 	defer exf.Close()
 
 	parseXml(inf, &ctxt)
-	tagInclude(&ctxt)
+	tagInclude(pathf, &ctxt)
 	writeYaml(outf, &ctxt)
 	if ctxt.exFile != "" {
 		writeExample(exf, &ctxt)
