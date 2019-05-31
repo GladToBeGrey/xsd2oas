@@ -31,13 +31,13 @@ func tagInclude(f io.Writer, ctxt *context) {
 	path := ""
 	doc := ctxt.complexTypes["Document"]
 	// fmt.Printf("Got Document%v\n", doc)
-	tagOne(ctxt, &doc, path, f)
+	tagOne(ctxt, doc, path, f)
 }
 
 func tagOne(ctxt *context, cplx *complexType, path string, f io.Writer) bool {
 	printed := false
-	fmt.Printf("Tagging: %v\n", path)
-	for idx, el := range cplx.elems {
+	// fmt.Printf("Tagging: %v\n", path)
+	for /*idx*/ _, el := range cplx.elems {
 		// fmt.Printf("Checking: %v (%v)\n", path+"/"+el.name, el.minOccurs)
 		choice := cplx.etype == "choice"
 		rqdXsd := ctxt.all || el.minOccurs != 0                   // XSD specifies mandatory: minOccurs -1 means unspecified, default 1
@@ -45,7 +45,7 @@ func tagOne(ctxt *context, cplx *complexType, path string, f io.Writer) bool {
 		if rqdXsd || rqdMask {
 			if t, ok := ctxt.complexTypes[el.etype]; ok {
 				//process complex type
-				if tagOne(ctxt, &t, path+"/"+el.name, f) {
+				if tagOne(ctxt, t, path+"/"+el.name, f) {
 					printed = true
 					t.include = true
 					el.include = true
@@ -59,10 +59,7 @@ func tagOne(ctxt *context, cplx *complexType, path string, f io.Writer) bool {
 						printed = true
 					}
 				}
-				if true /*t.include*/ {
-					ctxt.complexTypes[el.etype] = t
-				}
-				fmt.Printf("Complex: %v\n", path+"/"+el.name)
+				// fmt.Printf("Complex: %v\n", path+"/"+el.name)
 			} else {
 				// this element is required, but don't print 'mandatory' elements of choices unless specified in mask
 				if !choice || rqdMask {
@@ -74,19 +71,12 @@ func tagOne(ctxt *context, cplx *complexType, path string, f io.Writer) bool {
 				el.include = true
 				t := ctxt.simpleTypes[el.etype]
 				t.include = true
-				ctxt.simpleTypes[el.etype] = t
-				fmt.Printf("Simple: %v\n", path+"/"+el.name)
+				// fmt.Printf("Simple: %v\n", path+"/"+el.name)
 				for _, attr := range t.attrs {
-					t := ctxt.simpleTypes[attr.atype]
-					t.include = true
-					ctxt.simpleTypes[attr.atype] = t
+					ctxt.simpleTypes[attr.atype].include = true
 				}
 			}
 		}
-		if el.include {
-			cplx.elems[idx] = el
-		}
-
 	}
 	return printed
 }

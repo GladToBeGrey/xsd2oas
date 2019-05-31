@@ -40,7 +40,7 @@ func writeExample(f io.Writer, ctxt *context) {
 	fmt.Fprintf(f, "%v}\n", indent)
 }
 
-func writeOne(f io.Writer, ctxt *context, cplx complexType, path string, indent string) {
+func writeOne(f io.Writer, ctxt *context, cplx *complexType, path string, indent string) {
 	for idx, el := range cplx.elems {
 		arOpen, arClose := "", ""
 		if idx > 0 {
@@ -82,7 +82,7 @@ func writeOne(f io.Writer, ctxt *context, cplx complexType, path string, indent 
 	fmt.Fprintf(f, "\n%v}", indent)
 }
 
-func sampleData(s simpleType) string {
+func sampleData(s *simpleType) string {
 	jname, _ := mapTypename(s.base)
 	switch jname {
 	case "boolean":

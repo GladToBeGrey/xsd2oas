@@ -42,7 +42,7 @@ func writeName(n named, f io.Writer, ctxt *context, indent int) {
 // write an element
 // if multiple occurrences are allowed, make it an array of items
 // of the specified type
-func writeElement(el element, f io.Writer, ctxt *context, indent int) {
+func writeElement(el *element, f io.Writer, ctxt *context, indent int) {
 	if el.maxOccurs > 1 {
 		inPrintf(f, indent, "%s:\n", el.getName())
 		inPrintf(f, indent+tsz, "type: array\n")
@@ -58,7 +58,7 @@ func writeElement(el element, f io.Writer, ctxt *context, indent int) {
 // if it has attributes, turn it into an object
 // the value element represents the base type
 // each attribute forms a separate element named @Attributename
-func writeSimpleBody(simple simpleType, f io.Writer, ctxt *context, indent int) {
+func writeSimpleBody(simple *simpleType, f io.Writer, ctxt *context, indent int) {
 	if len(simple.attrs) > 0 {
 		inPrintf(f, indent, "type: object\n")
 		inPrintf(f, indent, "properties:\n")
@@ -73,7 +73,7 @@ func writeSimpleBody(simple simpleType, f io.Writer, ctxt *context, indent int) 
 }
 
 // write the properties of a simple type
-func writeSimpleProperties(simple simpleType, f io.Writer, ctxt *context, indent int) {
+func writeSimpleProperties(simple *simpleType, f io.Writer, ctxt *context, indent int) {
 	jtype, mapped := mapTypename(simple.base)
 	inPrintf(f, indent, "type: %s\n", jtype)
 	if mapped {
@@ -198,23 +198,23 @@ func writeSchemas(f io.Writer, ctxt *context, indent int) {
 }
 
 // write a simple type definition
-func writeSimple(simple simpleType, f io.Writer, ctxt *context, indent int) {
+func writeSimple(simple *simpleType, f io.Writer, ctxt *context, indent int) {
 	writeName(simple, f, ctxt, indent)
 	writeSimpleBody(simple, f, ctxt, indent+tsz)
 }
 
 // write a complex type definition
-func writeComplex(cmplx complexType, f io.Writer, ctxt *context, indent int) {
+func writeComplex(cmplx *complexType, f io.Writer, ctxt *context, indent int) {
 	writeName(cmplx, f, ctxt, indent)
 	writeComplexBody(cmplx, f, ctxt, indent+tsz)
 }
 
 // write the body of a complex type
-func writeComplexBody(cmplx complexType, f io.Writer, ctxt *context, indent int) {
+func writeComplexBody(cmplx *complexType, f io.Writer, ctxt *context, indent int) {
 	// if it's based on simple, do simple body
 	if cmplx.simpleBase != nil {
 		fmt.Printf("Doing simple body for %s: %v\n", cmplx.name, *cmplx.simpleBase)
-		writeSimpleBody(*cmplx.simpleBase, f, ctxt, indent+tsz)
+		writeSimpleBody(cmplx.simpleBase, f, ctxt, indent+tsz)
 		return
 	}
 

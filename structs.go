@@ -73,7 +73,7 @@ type complexType struct {
 	name       string
 	attrs      []attribute
 	etype      string // sequence | choice
-	elems      []element
+	elems      []*element
 	simpleBase *simpleType
 	anyFlag    bool //does the type allow "any" extension?
 	include    bool // if using mask
@@ -101,15 +101,15 @@ type context struct {
 	elem         *element
 	// the dictionary
 	root         *element
-	simpleTypes  map[string]simpleType
-	complexTypes map[string]complexType
+	simpleTypes  map[string]*simpleType
+	complexTypes map[string]*complexType
 }
 
 // initialise the context
 func newContext() context {
 	c := context{}
-	c.simpleTypes = make(map[string]simpleType)
-	c.complexTypes = make(map[string]complexType)
+	c.simpleTypes = make(map[string]*simpleType)
+	c.complexTypes = make(map[string]*complexType)
 	return c
 }
 
@@ -167,7 +167,7 @@ func newComplexType(aname string) *complexType {
 		name:       aname,
 		attrs:      make([]attribute, 0),
 		etype:      "",
-		elems:      make([]element, 0),
+		elems:      make([]*element, 0),
 		simpleBase: nil,
 	}
 }
@@ -202,6 +202,6 @@ func (c *complexType) clone(name *string) *complexType {
 		n.name = *name
 	}
 	n.attrs = append(make([]attribute, 0), c.attrs...)
-	n.elems = append(make([]element, 0), c.elems...)
+	n.elems = append(make([]*element, 0), c.elems...)
 	return n
 }

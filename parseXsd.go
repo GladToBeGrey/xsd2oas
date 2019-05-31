@@ -98,12 +98,12 @@ func startElement(el *xml.StartElement, ctxt *context) {
 			// over-write if already exists
 			for i, old := range ctxt.cplxType.elems {
 				if old.name == elem.name {
-					ctxt.cplxType.elems[i] = *elem
+					ctxt.cplxType.elems[i] = elem
 					found = true
 				}
 			}
 			if !found {
-				ctxt.cplxType.elems = append(ctxt.cplxType.elems, *elem)
+				ctxt.cplxType.elems = append(ctxt.cplxType.elems, elem)
 			}
 		}
 	case "attribute":
@@ -222,15 +222,15 @@ func endElement(el *xml.EndElement, ctxt *context) {
 	case "element":
 		ctxt.elem = nil // force an error if assignment attempted
 	case "simpleType":
-		ctxt.simpleTypes[ctxt.smplType.name] = *ctxt.smplType
+		ctxt.simpleTypes[ctxt.smplType.name] = ctxt.smplType
 		// fmt.Printf("simpleType %+v", ctxt.smplType)
 		ctxt.smplType = nil // force an error if assignment attempted
 	case "complexType":
 		if ctxt.smplType != nil {
-			ctxt.simpleTypes[ctxt.smplType.name] = *ctxt.smplType
+			ctxt.simpleTypes[ctxt.smplType.name] = ctxt.smplType
 			ctxt.smplType = nil // force an error if assignment attempted
 		} else {
-			ctxt.complexTypes[ctxt.cplxType.name] = *ctxt.cplxType
+			ctxt.complexTypes[ctxt.cplxType.name] = ctxt.cplxType
 			// fmt.Printf("complexType %+v", ctxt.cplxType)
 			ctxt.cplxType = nil // force an error if assignment attempted
 		}
