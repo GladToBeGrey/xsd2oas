@@ -176,13 +176,13 @@ func newComplexType(aname string) *complexType {
 // Deep copy attrs & enum so they can be
 // mutated without affecting the original.
 func (s *simpleType) clone(name *string) *simpleType {
-	n := s
+	n := *s
 	if name != nil {
 		n.name = *name
 	}
 	n.attrs = append(make([]attribute, 0), s.attrs...)
 	n.enum = append(make([]string, 0), s.enum...)
-	return n
+	return &n
 }
 
 // create a clone of complexType with a new name if specified
