@@ -22,6 +22,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 )
 
@@ -176,23 +177,28 @@ func writeComponents(f io.Writer, ctxt *context, indent int) {
 
 // write all the schema definitions
 func writeSchemas(f io.Writer, ctxt *context, indent int) {
-	// print all the simple type definitions first
+
 	inPrintf(f, indent, "schemas:\n\n")
-	inPrintf(f, indent+tsz, "# ---Simple type definitions---\n\n")
+
+	// merge simple and complex together and sort them
+	cmb := make([]string, 0)
 	for _, simple := range ctxt.simpleTypes {
 		if simple.include {
-			// fmt.Printf("Writing simple %v\n", simple.name)
-			writeSimple(simple, f, ctxt, indent+tsz)
-		} else {
-			// fmt.Printf("Ignoring simple %v\n", simple.name)
+			cmb = append(cmb, simple.name)
 		}
 	}
-	// now print all the complex type definitions
-	inPrintf(f, 0, "\n")
-	inPrintf(f, indent+tsz, "# ---Complex type definitions---\n\n")
 	for _, cmplx := range ctxt.complexTypes {
 		if cmplx.include {
-			writeComplex(cmplx, f, ctxt, indent+tsz)
+			cmb = append(cmb, cmplx.name)
+		}
+	}
+	sort.Strings(cmb)
+
+	for _, nm := range cmb {
+		if simple, ok := ctxt.simpleTypes[nm]; ok {
+			writeSimple(simple, f, ctxt, indent+tsz)
+		} else {
+			writeComplex(ctxt.complexTypes[nm], f, ctxt, indent+tsz)
 		}
 	}
 }
