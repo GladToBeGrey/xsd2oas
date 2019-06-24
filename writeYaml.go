@@ -227,22 +227,26 @@ func writeComplexBody(cmplx *complexType, f io.Writer, ctxt *context, indent int
 	switch cmplx.etype {
 	case "choice":
 		// XSD choice maps to YAML schema thus:
-		// "oneOf":
-		//   - "type": "object"
-		//     "properties":
-		//       "Pty":
-		//         "$ref": "#/components/schemas/PartyTypeDef",
-		//   - "type": "object"
-		//     "properties":
-		//       "Agt":
-		//         "$ref": "#/components/schemas/AgentTypeDef",
-		inPrintf(f, indent, "\"oneOf\":\n")
+		//   "type": "object"
+		//   "properties":
+		//     "Pty":
+		//       "$ref": "#/components/schemas/PartyTypeDef",
+		//     "Agt":
+		//       "$ref": "#/components/schemas/AgentTypeDef",
+		//   "oneOf":
+		//   - required: [Pty]
+		//   - required: [Agt]
+		inPrintf(f, indent, "type: object\n")
+		inPrintf(f, indent, "properties:\n")
 		for _, el := range cmplx.elems {
 			if el.include {
-				inPrintf(f, indent+tsz, "- type: \"object\"\n")
-				inPrintf(f, indent+tsz+2, "properties:\n")
-				inPrintf(f, indent+tsz+tsz+2, "%s:\n", el.getName())
-				inPrintf(f, indent+tsz+tsz+tsz+2, "$ref: '#/components/schemas/%s'\n", el.etype)
+				writeElement(el, f, ctxt, indent+tsz)
+			}
+		}
+		inPrintf(f, indent, "oneOf:\n")
+		for _, el := range cmplx.elems {
+			if el.include {
+				inPrintf(f, indent, "- required: [%v]\n", el.getName())
 			}
 		}
 
