@@ -139,46 +139,44 @@ func writeSimpleProperties(simple *simpleType, f io.Writer, ctxt *context, inden
 
 // write the file headers
 func writeHdrs(f io.Writer, ctxt *context, indent int) {
-	domain := "https://example.com"
+	servers := []string{"https://example.com"}
 	// when := time.Now().Format(time.RFC1123)
-	if ctxt.domain != "" {
-		domain = ctxt.domain
+	if ctxt.servers != "" {
+		r := regexp.MustCompile("\\s*,\\s*")
+		servers = r.Split(ctxt.servers, -1)
+	}
+	endpoint := "/" + ctxt.outFileBase
+	if ctxt.endpoint != "" {
+		endpoint = ctxt.endpoint
+		if endpoint[0:0] != "/" {
+			endpoint = "/" + endpoint
+		}
+	}
+	title := ctxt.outFileBase
+	if ctxt.title != "" {
+		title = ctxt.title
 	}
 	rootType := ctxt.complexTypes[ctxt.root.getName()]
-	hdrs := [...]string{
-		"openapi: 3.0.0\n",
-		"info:\n",
-		"\ttitle: '" + ctxt.outFileBase + "'\n",
-		"\tversion: '0.1'\n",
-		"\n",
-		"servers:\n",
-		"\t- url: '" + domain + "'\n",
-		"\n",
-		"paths:\n",
-		"\t'/" + ctxt.outFileBase + "':\n",
-		"\t\tput:\n",
-		"\t\t\trequestBody:\n",
-		"\t\t\t\tcontent:\n",
-		"\t\t\t\t\tapplication/json:\n",
-		"\t\t\t\t\t\tschema:\n",
-		"\t\t\t\t\t\t\t$ref: '#/components/schemas/" + rootType.elems[0].etype + "'\n",
-		"\t\t\tresponses:\n",
-		"\t\t\t\t'200':\n",
-		"\t\t\t\t\tdescription: Happy path\n",
-		"\t\t\t\t'400':\n",
-		"\t\t\t\t\tdescription: Bad request (body describes why)\n",
-		"\t\t\t\t'410':\n",
-		"\t\t\t\t\tdescription: Unauthorised\n",
-		"\t\t\t\t'504':\n",
-		"\t\t\t\t\tdescription: Gateway timeout (server did not respond)\n",
-		"\t\t\t\t'5XX':\n",
-		"\t\t\t\t\tdescription: Server Error\n",
+
+	var hdr string
+	if ctxt.hdrTemplate != "" {
+		hdr = ctxt.hdrTemplate
+	} else {
+		hdr = defaultHeader()
 	}
-	for _, str := range hdrs {
-		str = detab(str)
-		inPrintf(f, indent, str)
+
+	urls := ""
+	for _, s := range servers {
+		urls += "  - url: " + s + "\n"
 	}
-	inPrintf(f, 0, "\n")
+
+	r := strings.NewReplacer(
+		"$TITLE", title,
+		"$PATH", endpoint,
+		"$URLS", urls,
+		"$ROOT", rootType.elems[0].etype)
+	hdr = r.Replace(hdr)
+	fmt.Fprint(f, hdr)
 }
 
 // write all the component definitions
@@ -342,7 +340,45 @@ func arrayString(strs []string) string {
 	return s
 }
 
-func detab(str string) string {
-	spc := strings.Repeat(" ", tsz)
-	return strings.ReplaceAll(str, "\t", spc)
+func defaultHeader() string {
+	return `openapi: 3.0.0
+info:
+  title: '$TITLE'
+  version: '0.1'
+
+servers:
+$URLS
+
+paths:
+  '$PATH':
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/$ROOT'
+      responses:
+        '200':
+          description: Happy path
+        '400':
+          description: Bad request (body describes why)
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+        '429':
+          description: Too Many Requests
+        '4XX':
+          description: Client Error
+        '504':
+          description: Gateway timeout (server did not respond)
+        '5XX':
+          description: Server Error
+        
+`
 }

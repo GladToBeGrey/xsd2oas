@@ -32,6 +32,10 @@ func cmdLineParse(ctxt *context) {
 	maskFilePtr := flag.String("mask", "", "mask file name (input)")
 	pathFilePtr := flag.String("path", "", "path file name (output)")
 	exFilePtr := flag.String("ex", "", "example file name (output)")
+	templateFilePtr := flag.String("template", "", "template file (input)")
+	serversPtr := flag.String("servers", "", "server list (input)")
+	endpointPtr := flag.String("endpoint", "", "path to endpoint (input)")
+	titlePtr := flag.String("title", "", "title of specification (input)")
 	licPtr := flag.Bool("lic", false, "print license info")
 	fixupPtr := flag.Bool("fixup", false, "Fix Swagger uppercase bug")
 	allPtr := flag.Bool("all", false, "all elements")
@@ -45,6 +49,10 @@ Optional parameters:
 -mask maskfile
 -path pathfile
 -ex examplefile
+-template templatefile
+-servers server list (comma delimited)
+-endpoint relative path to endpoint (appended to server URL)
+-title title of specification
 -lic (print license)
 -fixup (fix Swagger uppercase bug)
 -all (include optional elements in path file)`, filepath.Base(os.Args[0]))
@@ -54,7 +62,11 @@ Optional parameters:
 	ctxt.inFile = *inFilePtr
 	ctxt.inFileBase = filepath.Base(ctxt.inFile)
 	ctxt.outFile = *outFilePtr
+	ctxt.templateFile = *templateFilePtr
 	ctxt.outFileBase = filepath.Base(ctxt.outFile)
+	ctxt.servers = *serversPtr
+	ctxt.endpoint = *endpointPtr
+	ctxt.title = *titlePtr
 	ctxt.printLicense = *licPtr
 	ctxt.fixUppercase = *fixupPtr
 	ctxt.all = *allPtr

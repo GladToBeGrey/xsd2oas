@@ -86,6 +86,7 @@ type context struct {
 	exFile       string
 	maskFile     string
 	pathFile     string
+	templateFile string
 	inFileBase   string // base part of path
 	outFileBase  string
 	exFileBase   string
@@ -96,7 +97,10 @@ type context struct {
 	all          bool
 	mask         bool
 	maskLines    []string
-	domain       string
+	servers      string
+	endpoint     string
+	title        string
+	hdrTemplate  string
 	smplType     *simpleType
 	cplxType     *complexType
 	elem         *element

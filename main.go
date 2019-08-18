@@ -22,6 +22,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -93,6 +94,16 @@ func main() {
 		// fmt.Printf("File %v scanned OK - %v lines\n", fname, len(ctxt.maskLines))
 	}
 	defer maskf.Close()
+
+	// open the template file
+	if ctxt.templateFile != "" {
+		b, err := ioutil.ReadFile(ctxt.templateFile)
+		if err != nil {
+			fmt.Printf("File %v read err %v", ctxt.templateFile, err)
+			os.Exit(2)
+		}
+		ctxt.hdrTemplate = string(b)
+	}
 
 	// open the example file
 	if ctxt.exFile != "" {

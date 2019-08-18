@@ -3,11 +3,14 @@ In the world of bank-to-bank payments, the standard for message formats is ISO20
 
 ## Usage
 **xsd2oas -in XSDfilename -out yamlFilename [-mask maskfile -path pathfile -ex examplefile -lic -fixup -all]**
-- XSDfilename is the location of the XSD file to process (in)
-- yamlFilename is the location to write the yaml file (out)
-- maskfile allows the user to specify fields to include (in)
-- pathfile is the location to write the paths file (out)
-- examplefile is the location to write the example JSON file (out)
+- XSDfilename (mandatory string) is the location of the XSD file to process (in)
+- yamlFilename (mandatory string) is the location to write the yaml file (out)
+- maskfile (string) allows the user to specify fields to include (in)
+- pathfile (string) is the location to write the paths file (out)
+- examplefile (string) is the location to write the example JSON file (out)
+- template (string) is the location of a file containing a template (in)
+- servers (string) is a comma-delimited list of server URLs (in)
+- endpoint (string) is the path to the endpoint relative to server URL (in)
 - lic prints license information
 - fixup fixes a Swagger bug that duplicates all uppercase parameters by Camelcasing
 - all includes all elements in the path file (if omitted, only mandatory fields are included)
@@ -24,6 +27,24 @@ Note that xsd2oas will include all fields that are mandatory according to the XS
 It may be useful to have a list of paths to the elements included in the yaml. This will be generated if the **pathfile** option is specified. A pathfile generated using the **all** option is a useful starting point to edit to create a maskfile. 
 
 An example JSON file that conforms to the specification will be generated if the **examplefile** option is specified. The JSON will be populated with quasi-random data, but each field conforms to the validation rules specified for that field (length, pattern, enumeration etc).
+
+A comma-delimited list of one or more server URLs may be specifed as the **servers** command-line parameter. If supplied these will be placed in the yaml file under the **servers:** section, with one url list entry per server.
+
+The endpoint may be specified using the **endpoint** parameter. It will be placed in the yaml file under the **paths:** section.
+
+The title may be specified using the **title** parameter. It will be placed in the yaml file as the value of info/title.
+
+## Template file
+In case the default settings for info, servers, paths etc. are not suitable, they can be completely over-ridden by using a template file. If a file path is provided as the **template** parameter, it completely replaces the yaml file until the **components:** section. The flexibility of the template mechanism is increased by means of substitution strings. If the keyword appears in the template file, it is replaced by the specified value.
+
+Keyword|Value
+-------|-----
+$TITLE|-title value if provided, else root of XSD filename
+$URLS|-servers value if provided, split into a list of - url: servername entries; else -url: https://example.com
+$PATH|-endpoint value if provided, else root of XSD filename
+$ROOT|**Mandatory** in template file; substituted by the name of the root type of the XSD
+
+See **template.txt** for an example corresponding to the default settings.
 
 ## Features
 xsd2oas supports the key XSD features, including:
