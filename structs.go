@@ -92,6 +92,7 @@ type context struct {
 	maskFileBase string
 	pathFileBase string
 	printLicense bool
+	fixUppercase bool
 	all          bool
 	mask         bool
 	maskLines    []string

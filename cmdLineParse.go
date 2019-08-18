@@ -33,6 +33,7 @@ func cmdLineParse(ctxt *context) {
 	pathFilePtr := flag.String("path", "", "path file name (output)")
 	exFilePtr := flag.String("ex", "", "example file name (output)")
 	licPtr := flag.Bool("lic", false, "print license info")
+	fixupPtr := flag.Bool("fixup", false, "Fix Swagger uppercase bug")
 	allPtr := flag.Bool("all", false, "all elements")
 
 	flag.Parse()
@@ -45,6 +46,7 @@ Optional parameters:
 -path pathfile
 -ex examplefile
 -lic (print license)
+-fixup (fix Swagger uppercase bug)
 -all (include optional elements in path file)`, filepath.Base(os.Args[0]))
 		os.Exit(1)
 	}
@@ -54,6 +56,7 @@ Optional parameters:
 	ctxt.outFile = *outFilePtr
 	ctxt.outFileBase = filepath.Base(ctxt.outFile)
 	ctxt.printLicense = *licPtr
+	ctxt.fixUppercase = *fixupPtr
 	ctxt.all = *allPtr
 
 	if *maskFilePtr != "" {

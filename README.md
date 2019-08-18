@@ -2,13 +2,14 @@
 In the world of bank-to-bank payments, the standard for message formats is ISO20022. This is an XML format, and there are many message types defined by XSDs at https://www.iso20022.org/. At the same time, there is increasing usage of APIs for payments. Hence there is a need to represent ISO20022 messages as OpenAPI Specification (Swagger). To ensure that the mapping is done correctly, a tool to convert XSD to OpenAPI Spec was needed. **xsd2oas** is that tool.
 
 ## Usage
-**xsd2oas -in XSDfilename -out yamlFilename [-mask maskfile -path pathfile -ex examplefile -lic -all]**
+**xsd2oas -in XSDfilename -out yamlFilename [-mask maskfile -path pathfile -ex examplefile -lic -fixup -all]**
 - XSDfilename is the location of the XSD file to process (in)
 - yamlFilename is the location to write the yaml file (out)
 - maskfile allows the user to specify fields to include (in)
 - pathfile is the location to write the paths file (out)
 - examplefile is the location to write the example JSON file (out)
 - lic prints license information
+- fixup fixes a Swagger bug that duplicates all uppercase parameters by Camelcasing
 - all includes all elements in the path file (if omitted, only mandatory fields are included)
 
 ## What it does

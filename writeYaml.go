@@ -22,11 +22,17 @@ package main
 import (
 	"fmt"
 	"io"
+	"regexp"
 	"sort"
 	"strings"
 )
 
 const tsz = 2 // tab size
+var regupr *regexp.Regexp
+
+func init() {
+	regupr = regexp.MustCompile("[a-z]") // compiled regexp tp find uppercase
+}
 
 // entry point for writing
 func writeYaml(f io.Writer, ctxt *context) {
@@ -44,13 +50,20 @@ func writeName(n named, f io.Writer, ctxt *context, indent int) {
 // if multiple occurrences are allowed, make it an array of items
 // of the specified type
 func writeElement(el *element, f io.Writer, ctxt *context, indent int) {
+	name := el.getName()
+	// if fixup flag set, convert param name that are all upppercase to camelcase
+	if ctxt.fixUppercase {
+		if regupr.FindStringIndex(name) == nil {
+			name = name[0:1] + strings.ToLower(name[1:])
+		}
+	}
 	if el.maxOccurs > 1 {
-		inPrintf(f, indent, "%s:\n", el.getName())
+		inPrintf(f, indent, "%s:\n", name)
 		inPrintf(f, indent+tsz, "type: array\n")
 		inPrintf(f, indent+tsz, "items:\n")
 		inPrintf(f, indent+tsz+tsz, "$ref: '#/components/schemas/%s'\n", el.etype)
 	} else {
-		inPrintf(f, indent, "%s:\n", el.getName())
+		inPrintf(f, indent, "%s:\n", name)
 		inPrintf(f, indent+tsz, "$ref: '#/components/schemas/%s'\n", el.etype)
 	}
 }
