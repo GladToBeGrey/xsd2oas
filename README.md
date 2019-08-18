@@ -2,7 +2,7 @@
 In the world of bank-to-bank payments, the standard for message formats is ISO20022. This is an XML format, and there are many message types defined by XSDs at https://www.iso20022.org/. At the same time, there is increasing usage of APIs for payments. Hence there is a need to represent ISO20022 messages as OpenAPI Specification (Swagger). To ensure that the mapping is done correctly, a tool to convert XSD to OpenAPI Spec was needed. **xsd2oas** is that tool.
 
 ## Usage
-**xsd2oas -in XSDfilename -out yamlFilename [-mask maskfile -path pathfile -ex examplefile -lic -fixup -all]**
+**xsd2oas -in XSDfilename -out yamlFilename [-mask maskfile -path pathfile -ex examplefile -template templatefile -servers servers -endpoint endpoint -lic -fixup -all]**
 - XSDfilename (mandatory string) is the location of the XSD file to process (in)
 - yamlFilename (mandatory string) is the location to write the yaml file (out)
 - maskfile (string) allows the user to specify fields to include (in)
@@ -62,11 +62,12 @@ There is no direct support for attributes in OAS, so the following mapping conve
 - The object contains key "value": value of XML text
 - The object also contains keys "@Attribname", one per attribute.
 Example:
-`
+```
 IntrBkSttlmAmt: {
-   'value': 1234
+   'value': 1234,
    '@Ccy': 'GBP'
-`
+}
+```
 ## Version support
 xsd2oas generates schema files compatible with OAS Version 3.
 
