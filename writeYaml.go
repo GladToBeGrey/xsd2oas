@@ -30,12 +30,27 @@ import (
 const tsz = 2 // tab size
 var regupr *regexp.Regexp
 
+// default fixup does nothing
+var fixup = func(a string) string {
+	return a
+}
+
 func init() {
 	regupr = regexp.MustCompile("[a-z]") // compiled regexp tp find uppercase
 }
 
 // entry point for writing
 func writeYaml(f io.Writer, ctxt *context) {
+
+	if ctxt.fixUppercase {
+		// convert param name that are all upppercase to camelcase
+		fixup = func(name string) string {
+			if regupr.FindStringIndex(name) == nil {
+				name = name[0:1] + strings.ToLower(name[1:])
+			}
+			return name
+		}
+	}
 
 	writeHdrs(f, ctxt, 0)
 	writeComponents(f, ctxt, 0)
@@ -50,13 +65,8 @@ func writeName(n named, f io.Writer, ctxt *context, indent int) {
 // if multiple occurrences are allowed, make it an array of items
 // of the specified type
 func writeElement(el *element, f io.Writer, ctxt *context, indent int) {
-	name := el.getName()
-	// if fixup flag set, convert param name that are all upppercase to camelcase
-	if ctxt.fixUppercase {
-		if regupr.FindStringIndex(name) == nil {
-			name = name[0:1] + strings.ToLower(name[1:])
-		}
-	}
+	name := fixup(el.getName())
+
 	if el.maxOccurs > 1 {
 		inPrintf(f, indent, "%s:\n", name)
 		inPrintf(f, indent+tsz, "type: array\n")
@@ -257,7 +267,7 @@ func writeComplexBody(cmplx *complexType, f io.Writer, ctxt *context, indent int
 		inPrintf(f, indent, "oneOf:\n")
 		for _, el := range cmplx.elems {
 			if el.include {
-				inPrintf(f, indent, "- required: [%v]\n", el.getName())
+				inPrintf(f, indent, "- required: [%v]\n", fixup(el.getName()))
 			}
 		}
 
@@ -274,7 +284,7 @@ func writeComplexBody(cmplx *complexType, f io.Writer, ctxt *context, indent int
 				if el.include {
 					writeElement(el, f, ctxt, indent+tsz)
 					if el.minOccurs != 0 {
-						required = append(required, el.getName())
+						required = append(required, fixup(el.getName()))
 					}
 				}
 			}
