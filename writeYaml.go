@@ -50,13 +50,7 @@ func writeName(n named, f io.Writer, ctxt *context, indent int) {
 // if multiple occurrences are allowed, make it an array of items
 // of the specified type
 func writeElement(el *element, f io.Writer, ctxt *context, indent int) {
-	name := el.getName()
-	// if fixup flag set, convert param name that are all upppercase to camelcase
-	if ctxt.fixUppercase {
-		if regupr.FindStringIndex(name) == nil {
-			name = name[0:1] + strings.ToLower(name[1:])
-		}
-	}
+	name := convertToCamelCase(ctxt, el.getName())
 	if el.maxOccurs > 1 {
 		inPrintf(f, indent, "%s:\n", name)
 		inPrintf(f, indent+tsz, "type: array\n")
@@ -257,7 +251,7 @@ func writeComplexBody(cmplx *complexType, f io.Writer, ctxt *context, indent int
 		inPrintf(f, indent, "oneOf:\n")
 		for _, el := range cmplx.elems {
 			if el.include {
-				inPrintf(f, indent, "- required: [%v]\n", el.getName())
+				inPrintf(f, indent, "- required: [%v]\n", convertToCamelCase(ctxt, el.getName()))
 			}
 		}
 
@@ -274,7 +268,7 @@ func writeComplexBody(cmplx *complexType, f io.Writer, ctxt *context, indent int
 				if el.include {
 					writeElement(el, f, ctxt, indent+tsz)
 					if el.minOccurs != 0 {
-						required = append(required, el.getName())
+						required = append(required,convertToCamelCase(ctxt, el.getName()))
 					}
 				}
 			}
@@ -289,6 +283,17 @@ func writeComplexBody(cmplx *complexType, f io.Writer, ctxt *context, indent int
 		inPrintf(f, indent, "# XSD allows 'any', so properties not restricted\n")
 	}
 }
+
+func convertToCamelCase( ctxt *context, attributeValue string) string {
+    // if fixup flag set, convert param name that are all upppercase to camelcase
+    if ctxt.fixUppercase {
+      if regupr.FindStringIndex(attributeValue) == nil {
+        attributeValue = attributeValue[0:1] + strings.ToLower(attributeValue[1:])
+      }
+    }
+  return attributeValue
+}
+
 
 func writeAttrs(attd attributed, f io.Writer, ctxt *context, indent int) []string {
 	attrs := attd.getAttrs()
@@ -362,7 +367,7 @@ paths:
           description: Happy path
         '400':
           description: Bad request (body describes why)
-          content: 
+          content:
             application/json:
               schema:
                 type: object
@@ -379,6 +384,6 @@ paths:
           description: Gateway timeout (server did not respond)
         '5XX':
           description: Server Error
-        
+
 `
 }
